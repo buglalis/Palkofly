@@ -3,7 +3,7 @@
 #include <Adafruit_BMP085.h>
 #include <MPU9250_WE.h>
 #include <Wire.h>
-#include <string>
+
 
 #define MPU9250_ADDR 0x68
 
@@ -28,6 +28,8 @@ Adafruit_BMP085 bmp;
 MPU9250_WE myMPU9250 = MPU9250_WE(MPU9250_ADDR);
 String ans;
 const char sep =',';
+unsigned long long Time;
+unsigned long Time_1,Time_2;
 xyzFloat gValue;
 float resultantG;
 xyzFloat gyr;
@@ -36,22 +38,22 @@ SoftwareSerial ass(16,17);
 TinyGPSPlus gps;
 
 static char HEADER[] = {
-    "time_1,gyro_X,"
-    "time_2,gyro_Y,"
-    "time_3,gyro_Z,"
-    "time_4,acceleration_X,"
-    "time_5,acceleration_Y,"
-    "time_6,acceleration_Z,"
-    "time_7,Resultant g,"
-    "time_8,Temperature,"
-    "time_9,Pressure,"
-    "time_10,Altitude,"
-    "time_11,Pressure at sealevel (calculated),"
-    "time_12,Latitude,"
-    "time_13,Longitude,"
-    "time_14,GPS_Altitude,"
-    "time_15,speed,"
-    "time_16,course,time_17"
+    "time_1.1,time_1.2,gyro_X,"
+    "time_2.1,time_2.2,gyro_Y,"
+    "time_3.1,time_3.2,gyro_Z,"
+    "time_4.1,time_4.2,acceleration_X,"
+    "time_5.1,time_5.2,acceleration_Y,"
+    "time_6.1,time_6.2,acceleration_Z,"
+    "time_7.1,time_7.2,Resultant g,"
+    "time_8.1,time_8.2,Temperature,"
+    "time_9.1,time_9.2,Pressure,"
+    "time_10.1,time_10.2,Altitude,"
+    "time_11.1,time_11.2,Pressure at sealevel (calculated),"
+    "time_12.1,time_12.2,Latitude,"
+    "time_13.1,time_13.2,Longitude,"
+    "time_14.1,time_14.2,GPS_Altitude,"
+    "time_15.1,time_15.2,speed,"
+    "time_16.1,time_16.2,course,time_17.1,time_17.2"
 };
 
 
@@ -73,8 +75,8 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
   file.close();
 }
 
+
 void setup() {
-  
    pinMode(12,OUTPUT);
    digitalWrite(12,HIGH);
    delay(100);
@@ -113,24 +115,24 @@ void loop() {
     gps.encode(ass.read());
   }
   ans="\n";
-  ans+=String(micros())+sep;
-  ans+=String(gyr.x)+sep;ans+=String(micros())+sep;
-  ans+=String(gyr.y)+sep;ans+=String(micros())+sep;
-  ans+=String(gyr.z)+sep;ans+=String(micros())+sep;
-  ans+=String(gValue.x)+sep;ans+=String(micros())+sep;
-  ans+=String(gValue.y)+sep;ans+=String(micros())+sep;
-  ans+=String(gValue.z)+sep;ans+=String(micros())+sep;
-  ans+=String(resultantG)+sep;ans+=String(micros())+sep;
-  ans+=String(bmp.readTemperature()) + sep;ans+=String(micros())+sep;
-  ans+=String(bmp.readPressure()) + sep;ans+=String(micros())+sep;
-  ans+=String(bmp.readAltitude()) + sep;ans+=String(micros())+sep;
-  ans+=String(bmp.readSealevelPressure())+sep;ans+=String(micros())+sep;
-  
-  ans+=String(gps.location.lat(),6)+sep;ans+=String(micros())+sep;
-  ans+=String(gps.location.lng(),6)+sep;ans+=String(micros())+sep;
-  ans+=String(gps.altitude.meters())+sep;ans+=String(micros())+sep;
-  ans+=String(gps.speed.mps())+sep;ans+=String(micros())+sep;
-  ans+=String(gps.course.deg())+sep;ans+=String(micros());
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gyr.x)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gyr.y)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gyr.z)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gValue.x)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gValue.y)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gValue.z)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(resultantG)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(bmp.readTemperature())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(bmp.readPressure())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(bmp.readAltitude())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(bmp.readSealevelPressure())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gps.location.lat(),6)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gps.location.lng(),6)+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gps.altitude.meters())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gps.speed.mps())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2)+sep+String(gps.course.deg())+sep;
+  Time=micros();Time_1=Time/1000000000;Time_2=Time%1000000000;ans+=String(Time_1)+sep+String(Time_2);
+
   
   appendFile(SD, "/test.txt",ans.c_str());
 
