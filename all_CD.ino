@@ -1,3 +1,10 @@
+#include <EEPROM.h>
+#define EEPROM_SIZE 1
+
+int filenumber;
+String filestr="/data_";
+const char* filename;
+
 #include <SoftwareSerial.h>
 #include <TinyGPSPlus.h>
 #include <Adafruit_BMP085.h>
@@ -11,12 +18,10 @@
 #define SDA_PIN 21
 #define SCL_PIN 22
 
-#define MISO  14
-#define SCK  27
-#define MOSI  26
-#define CS  25
-
-
+#define MISO 14
+#define SCK 27
+#define MOSI 26
+#define CS 25
 
 #ifdef _ESP32_HAL_I2C_H_
 #endif
@@ -29,7 +34,7 @@ xyzFloat gValue;
 float resultantG;
 xyzFloat gyr;
 SPIClass spi = SPIClass(VSPI);
-SoftwareSerial ass(16,17);
+SoftwareSerial ass(16,17,false,256);
 TinyGPSPlus gps;
 
 static char HEADER[] = {
@@ -71,13 +76,18 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
 }
 
 void setup() {
+  EEPROM.begin(EEPROM_SIZE);
+  filenumber = EEPROM.read(0);
+  if ((filenumber<0) or (filenumber>256)){ filenumber=0; }
+  filestr+=String(filenumber)+".txt";
+  filename=filestr.c_str();
   
-   pinMode(12,OUTPUT);
-   digitalWrite(12,HIGH);
-   delay(100);
-   digitalWrite(12,LOW);
+  pinMode(12,OUTPUT);
+  digitalWrite(12,HIGH);
+  delay(100);
+  digitalWrite(12,LOW);
   bmp.begin();
-  ass.begin(9600);
+  ass.begin(115200);
   #ifdef _ESP32_HAL_I2C_H_
   Wire.begin(SDA_PIN, SCL_PIN); 
   #else
@@ -94,13 +104,17 @@ void setup() {
   myMPU9250.enableGyrDLPF();
   myMPU9250.setSampleRateDivider(99);
   myMPU9250.setGyrRange(MPU9250_GYRO_RANGE_2000);
-  
-  writeFile(SD, "/test.txt", HEADER);
+
   while  (!gps.altitude.isUpdated()){while (ass.available() > 0){gps.encode(ass.read());}}
-    digitalWrite(12,HIGH);
-    delay(1000);
-    digitalWrite(12,LOW);
-    }
+  
+  digitalWrite(12,HIGH);
+  delay(1000);
+  digitalWrite(12,LOW);
+  writeFile(SD, filename, HEADER);
+  EEPROM.write(0, filenumber+1);
+  EEPROM.commit();
+}
+  
 
 void loop() {
   gValue = myMPU9250.getGValues();
@@ -126,9 +140,10 @@ void loop() {
   ans+=String(gps.location.lat(),6)+sep;ans+=String(micros())+sep;
   ans+=String(gps.location.lng(),6)+sep;ans+=String(micros())+sep;
   ans+=String(gps.altitude.meters())+sep;ans+=String(micros())+sep;
+  
   ans+=String(gps.speed.mps())+sep;ans+=String(micros())+sep;
   ans+=String(gps.course.deg())+sep;ans+=String(micros());
   
-  appendFile(SD, "/test.txt",ans.c_str());
+  appendFile(SD, filename, ans.c_str());
 
 }
